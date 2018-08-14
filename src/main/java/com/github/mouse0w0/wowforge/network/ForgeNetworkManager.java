@@ -3,9 +3,10 @@ package com.github.mouse0w0.wowforge.network;
 import com.github.mouse0w0.wow.WowPlatform;
 import com.github.mouse0w0.wow.network.NetworkManagerBase;
 import com.github.mouse0w0.wow.network.Packet;
-import com.github.mouse0w0.wow.network.packet.common.VerificationPacket;
+import com.github.mouse0w0.wow.network.packet.client.ClientVerificationPacket;
+import com.github.mouse0w0.wow.network.packet.server.ServerVerificationPacket;
 import com.github.mouse0w0.wowforge.WowForge;
-import com.github.mouse0w0.wowforge.network.handler.VerificationPacketHandler;
+import com.github.mouse0w0.wowforge.network.handler.ServerVerificationPacketHandler;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.common.MinecraftForge;
@@ -20,15 +21,12 @@ public class ForgeNetworkManager extends NetworkManagerBase {
 
     private FMLEventChannel channel;
 
-    public ForgeNetworkManager() {
-        register(VerificationPacket.class, new VerificationPacketHandler());
-    }
-
     public void init() {
-        MinecraftForge.EVENT_BUS.register(this);
-        FMLCommonHandler.instance().bus().register(this);
         channel = NetworkRegistry.INSTANCE.newEventDrivenChannel(WowPlatform.NAME);
-        channel.register(WowForge.instance);
+        channel.register(this);
+
+        register(ServerVerificationPacket.class, new ServerVerificationPacketHandler());
+        register(ClientVerificationPacket.class, null);
     }
 
     @Override
