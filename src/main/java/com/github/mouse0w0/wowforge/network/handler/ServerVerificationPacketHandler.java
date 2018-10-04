@@ -29,7 +29,7 @@ public class ServerVerificationPacketHandler implements PacketHandler<ServerVeri
     public void hander(Object sender, ServerVerificationPacket packet) {
         currentServer = new Server(packet);
         WowForge.getLogger().info("Received server verification. Version: " + currentServer.getVersion());
-        WowForge.getNetwork().send(null, new ClientVerificationPacket(WowPlatform.INTERNAL_VERSION));
+        WowForge.getNetwork().send(null, new ClientVerificationPacket(WowPlatform.getInternalVersion()));
     }
 
     @SubscribeEvent

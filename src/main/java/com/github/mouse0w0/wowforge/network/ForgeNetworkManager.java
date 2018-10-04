@@ -22,7 +22,7 @@ public class ForgeNetworkManager extends NetworkManagerBase {
     private FMLEventChannel channel;
 
     public void init() {
-        channel = NetworkRegistry.INSTANCE.newEventDrivenChannel(WowPlatform.NAME);
+        channel = NetworkRegistry.INSTANCE.newEventDrivenChannel(WowPlatform.getNetworkChannelName());
         channel.register(this);
 
         register(ServerVerificationPacket.class, new ServerVerificationPacketHandler());
@@ -33,7 +33,7 @@ public class ForgeNetworkManager extends NetworkManagerBase {
     public void send(Object target, Packet packet) {
         ByteBuf buf = createBuffer(packet.getClass());
         packet.write(buf);
-        FMLProxyPacket mcPacket = new FMLProxyPacket(new PacketBuffer(buf), WowPlatform.NAME);
+        FMLProxyPacket mcPacket = new FMLProxyPacket(new PacketBuffer(buf), WowPlatform.getNetworkChannelName());
         channel.sendToServer(mcPacket);
     }
 
