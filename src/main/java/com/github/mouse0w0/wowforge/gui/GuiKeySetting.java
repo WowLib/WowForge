@@ -1,42 +1,34 @@
 package com.github.mouse0w0.wowforge.gui;
 
-import net.minecraft.client.Minecraft;
+import com.github.mouse0w0.wow.keybinding.Key;
+import com.github.mouse0w0.wow.keybinding.KeyModifier;
+import com.github.mouse0w0.wowforge.WowForge;
+import com.github.mouse0w0.wowforge.keybinding.ClientKeyBinding;
 import net.minecraft.client.gui.*;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.client.settings.GameSettings;
-import net.minecraft.client.settings.KeyBinding;
 
 import java.io.IOException;
 
-public class GuiKeySetting extends GuiScreen
-{
-    private static final GameSettings.Options[] OPTIONS_ARR = new GameSettings.Options[] {GameSettings.Options.INVERT_MOUSE, GameSettings.Options.SENSITIVITY, GameSettings.Options.TOUCHSCREEN, GameSettings.Options.AUTO_JUMP};
-    /** A reference to the screen object that created this. Used for navigating between screens. */
-    protected String screenTitle = "Controls";
-    /** Reference to the GameSettings object. */
-    private final GameSettings options;
-    /** The ID of the button that has been pressed. */
-    public KeyBinding buttonId;
-    public long time;
+public class GuiKeySetting extends GuiScreen {
+
+    protected String screenTitle = "WowKeySetting";
+    public ClientKeyBinding buttonId;
     private GuiKeyBindingList keyBindingList;
     private GuiButton buttonReset;
 
-    public GuiKeySetting(GameSettings settings)
-    {
-        this.options = settings;
+    public GuiKeySetting() {
     }
 
     /**
      * Adds the buttons (and other controls) to the screen in question. Called when the GUI is displayed and when the
      * window resizes, the buttonList is cleared beforehand.
      */
-    public void initGui()
-    {
+    public void initGui() {
         this.keyBindingList = new GuiKeyBindingList(this, this.mc);
         this.buttonList.add(new GuiButton(200, this.width / 2 - 155 + 160, this.height - 29, 150, 20, I18n.format("gui.done")));
         this.buttonReset = this.addButton(new GuiButton(201, this.width / 2 - 155, this.height - 29, 150, 20, I18n.format("controls.resetAll")));
-        this.screenTitle = I18n.format("controls.title");
-        int i = 0;
+        this.screenTitle = I18n.format("wow.keysetting.title");
+//        int i = 0;
 
 //        for (GameSettings.Options gamesettings$options : OPTIONS_ARR)
 //        {
@@ -56,8 +48,7 @@ public class GuiKeySetting extends GuiScreen
     /**
      * Handles mouse input.
      */
-    public void handleMouseInput() throws IOException
-    {
+    public void handleMouseInput() throws IOException {
         super.handleMouseInput();
         this.keyBindingList.handleMouseInput();
     }
@@ -65,42 +56,32 @@ public class GuiKeySetting extends GuiScreen
     /**
      * Called by the controls from the buttonList when activated. (Mouse pressed for buttons)
      */
-    protected void actionPerformed(GuiButton button) throws IOException
-    {
-        if (button.id == 200)
-        {
+    protected void actionPerformed(GuiButton button) throws IOException {
+        if (button.id == 200) {
             this.mc.displayGuiScreen(null);
-        }
-        else if (button.id == 201)
-        {
-            for (KeyBinding keybinding : this.mc.gameSettings.keyBindings)
-            {
-                keybinding.setToDefault();
+        } else if (button.id == 201) {
+            for (ClientKeyBinding keybinding : WowForge.getKeyBindingManager().getValues()) {
+                keybinding.resetToDefault();
             }
 
-            KeyBinding.resetKeyBindingArrayAndHash();
+            WowForge.getKeyBindingManager().refresh();
         }
-        else if (button.id < 100 && button instanceof GuiOptionButton)
-        {
-            this.options.setOptionValue(((GuiOptionButton)button).getOption(), 1);
-            button.displayString = this.options.getKeyBinding(GameSettings.Options.byOrdinal(button.id));
-        }
+//        } else if (button.id < 100 && button instanceof GuiOptionButton) {
+//            this.options.setOptionValue(((GuiOptionButton) button).getOption(), 1);
+//            button.displayString = this.options.getKeyBinding(GameSettings.Options.byOrdinal(button.id));
+//        }
     }
 
     /**
      * Called when the mouse is clicked. Args : mouseX, mouseY, clickedButton
      */
-    protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException
-    {
-        if (this.buttonId != null)
-        {
-            this.buttonId.setKeyModifierAndCode(net.minecraftforge.client.settings.KeyModifier.getActiveModifier(), -100 + mouseButton);
-            this.options.setOptionKeyBinding(this.buttonId, -100 + mouseButton);
+    protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
+        if (this.buttonId != null) {
+            buttonId.setKey(Key.valueOfMouse(mouseButton));
+            buttonId.setKeyModifier(getActiveModifier());
             this.buttonId = null;
-            KeyBinding.resetKeyBindingArrayAndHash();
-        }
-        else if (mouseButton != 0 || !this.keyBindingList.mouseClicked(mouseX, mouseY, mouseButton))
-        {
+            WowForge.getKeyBindingManager().refresh();
+        } else if (mouseButton != 0 || !this.keyBindingList.mouseClicked(mouseX, mouseY, mouseButton)) {
             super.mouseClicked(mouseX, mouseY, mouseButton);
         }
     }
@@ -108,10 +89,8 @@ public class GuiKeySetting extends GuiScreen
     /**
      * Called when a mouse button is released.
      */
-    protected void mouseReleased(int mouseX, int mouseY, int state)
-    {
-        if (state != 0 || !this.keyBindingList.mouseReleased(mouseX, mouseY, state))
-        {
+    protected void mouseReleased(int mouseX, int mouseY, int state) {
+        if (state != 0 || !this.keyBindingList.mouseReleased(mouseX, mouseY, state)) {
             super.mouseReleased(mouseX, mouseY, state);
         }
     }
@@ -120,51 +99,39 @@ public class GuiKeySetting extends GuiScreen
      * Fired when a key is typed (except F11 which toggles full screen). This is the equivalent of
      * KeyListener.keyTyped(KeyEvent e). Args : character (character on the key), keyCode (lwjgl Keyboard key code)
      */
-    protected void keyTyped(char typedChar, int keyCode) throws IOException
-    {
-        if (this.buttonId != null)
-        {
-            if (keyCode == 1)
-            {
-                this.buttonId.setKeyModifierAndCode(net.minecraftforge.client.settings.KeyModifier.NONE, 0);
-                this.options.setOptionKeyBinding(this.buttonId, 0);
-            }
-            else if (keyCode != 0)
-            {
-                this.buttonId.setKeyModifierAndCode(net.minecraftforge.client.settings.KeyModifier.getActiveModifier(), keyCode);
-                this.options.setOptionKeyBinding(this.buttonId, keyCode);
-            }
-            else if (typedChar > 0)
-            {
-                this.buttonId.setKeyModifierAndCode(net.minecraftforge.client.settings.KeyModifier.getActiveModifier(), typedChar + 256);
-                this.options.setOptionKeyBinding(this.buttonId, typedChar + 256);
+    protected void keyTyped(char typedChar, int keyCode) throws IOException {
+        if (this.buttonId != null) {
+            if (keyCode != 0) {
+                buttonId.setKey(Key.valueOf(keyCode));
+                buttonId.setKeyModifier(getActiveModifier());
+            } else if (typedChar > 0) {
+                buttonId.setKey(Key.valueOf(typedChar + 256));
+                buttonId.setKeyModifier(getActiveModifier());
             }
 
             if (!net.minecraftforge.client.settings.KeyModifier.isKeyCodeModifier(keyCode))
                 this.buttonId = null;
-            this.time = Minecraft.getSystemTime();
-            KeyBinding.resetKeyBindingArrayAndHash();
-        }
-        else
-        {
+            WowForge.getKeyBindingManager().refresh();
+        } else {
             super.keyTyped(typedChar, keyCode);
         }
+    }
+
+    private KeyModifier getActiveModifier() {
+       return ClientKeyBinding.getActiveModifier();
     }
 
     /**
      * Draws the screen and all the components in it.
      */
-    public void drawScreen(int mouseX, int mouseY, float partialTicks)
-    {
+    public void drawScreen(int mouseX, int mouseY, float partialTicks) {
         this.drawDefaultBackground();
         this.keyBindingList.drawScreen(mouseX, mouseY, partialTicks);
         this.drawCenteredString(this.fontRenderer, this.screenTitle, this.width / 2, 8, 16777215);
         boolean flag = false;
 
-        for (KeyBinding keybinding : this.options.keyBindings)
-        {
-            if (!keybinding.isSetToDefaultValue())
-            {
+        for (ClientKeyBinding keybinding : WowForge.getKeyBindingManager().getValues()) {
+            if (!keybinding.isDefault()) {
                 flag = true;
                 break;
             }

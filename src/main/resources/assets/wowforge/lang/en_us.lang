@@ -1,2 +1,3 @@
-wowforge.keybinding.category=Wow KeyBindings
-wowforge.keybinding.openKeySetting= Open Custom Key Setting
+wow.keybinding.title=KeyBinding Setting
+wow.keybinding.category=Wow KeyBindings
+wow.keybinding.openKeySetting= Open Custom Key Setting

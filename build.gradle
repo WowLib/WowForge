@@ -26,6 +26,7 @@ minecraft {
 }
 
 repositories {
+    mavenLocal()
     maven { url 'https://jitpack.io' }
 }
 
@@ -35,7 +36,8 @@ configurations {
 }
 
 dependencies {
-    embed ("com.github.Mouse0w0:WowCommon:${wow_version}")
+    //embed ("com.github.Mouse0w0:WowCommon:${wow_version}")
+    embed ("com.github.mouse0w0:wow:1.0.0")
 }
 
 jar {

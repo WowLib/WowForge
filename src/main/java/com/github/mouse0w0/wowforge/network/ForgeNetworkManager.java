@@ -4,8 +4,11 @@ import com.github.mouse0w0.wow.WowPlatform;
 import com.github.mouse0w0.wow.network.NetworkManagerBase;
 import com.github.mouse0w0.wow.network.Packet;
 import com.github.mouse0w0.wow.network.packet.client.ClientVerificationPacket;
+import com.github.mouse0w0.wow.network.packet.client.KeyBindingActionPacket;
+import com.github.mouse0w0.wow.network.packet.server.RegisterKeyBindingPacket;
 import com.github.mouse0w0.wow.network.packet.server.ServerVerificationPacket;
 import com.github.mouse0w0.wowforge.WowForge;
+import com.github.mouse0w0.wowforge.network.handler.RegisterKeyBindingPacketHandler;
 import com.github.mouse0w0.wowforge.network.handler.ServerVerificationPacketHandler;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.PacketBuffer;
@@ -25,15 +28,15 @@ public class ForgeNetworkManager extends NetworkManagerBase {
         channel = NetworkRegistry.INSTANCE.newEventDrivenChannel(WowPlatform.getNetworkChannelName());
         channel.register(this);
 
-        register(ServerVerificationPacket.class, new ServerVerificationPacketHandler());
-        register(ClientVerificationPacket.class, null);
+        register(ServerVerificationPacket.class, new ServerVerificationPacketHandler()); // id 0;
+        register(ClientVerificationPacket.class, null); // id 1;
+        register(RegisterKeyBindingPacket.class, new RegisterKeyBindingPacketHandler()); // id 2;
+        register(KeyBindingActionPacket.class, null); // id 3;
     }
 
     @Override
-    public void send(Object target, Packet packet) {
-        ByteBuf buf = createBuffer(packet.getClass());
-        packet.write(buf);
-        FMLProxyPacket mcPacket = new FMLProxyPacket(new PacketBuffer(buf), WowPlatform.getNetworkChannelName());
+    protected void send(Object target, ByteBuf byteBuf) {
+        FMLProxyPacket mcPacket = new FMLProxyPacket(new PacketBuffer(byteBuf), WowPlatform.getNetworkChannelName());
         channel.sendToServer(mcPacket);
     }
 
@@ -41,5 +44,10 @@ public class ForgeNetworkManager extends NetworkManagerBase {
     public void onClientPacket(FMLNetworkEvent.ClientCustomPacketEvent event) {
         ByteBuf buf = event.getPacket().payload();
         handle(null, buf.readBytes(buf.readableBytes()));
+    }
+
+    @SubscribeEvent
+    public void onJoinServer(FMLNetworkEvent.ClientConnectedToServerEvent event) {
+        WowForge.resetRegistry();
     }
 }

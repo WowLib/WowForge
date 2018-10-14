@@ -1,2 +1,3 @@
-wowforge.keybinding.category=Wow按键
-wowforge.keybinding.openKeySetting=打开自定义按键设置
+wow.keybinding.title=按键设置
+wow.keybinding.category=Wow按键
+wow.keybinding.openKeySetting=打开自定义按键设置
