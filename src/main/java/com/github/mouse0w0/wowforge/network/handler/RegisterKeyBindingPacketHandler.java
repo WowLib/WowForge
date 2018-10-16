@@ -18,6 +18,7 @@ public class RegisterKeyBindingPacketHandler implements PacketHandler<RegisterKe
     public void hander(Object o, RegisterKeyBindingPacket packet) {
         JsonArray keyBindings = packet.getJson();
         ClientKeyBindingManager keyBindingManager = WowForge.getKeyBindingManager();
+        keyBindingManager.clear();
         for(JsonElement json: keyBindings) {
             JsonObject jo = json.getAsJsonObject();
             ClientKeyBinding keyBinding = new ClientKeyBinding(Key.valueOf(jo.get("key").getAsInt()),
@@ -28,5 +29,6 @@ public class RegisterKeyBindingPacketHandler implements PacketHandler<RegisterKe
             keyBindingManager.register(keyBinding);
             keyBindingManager.setId(keyBinding, jo.get("id").getAsInt());
         }
+        keyBindingManager.refresh();
     }
 }

@@ -2,16 +2,11 @@ package com.github.mouse0w0.wowforge;
 
 import com.github.mouse0w0.wow.PlatformProvider;
 import com.github.mouse0w0.wow.WowPlatform;
-import com.github.mouse0w0.wow.keybinding.Key;
-import com.github.mouse0w0.wow.keybinding.KeyBinding;
-import com.github.mouse0w0.wow.keybinding.KeyDomain;
-import com.github.mouse0w0.wow.keybinding.KeyModifier;
 import com.github.mouse0w0.wow.network.NetworkManager;
 import com.github.mouse0w0.wow.profile.Server;
-import com.github.mouse0w0.wow.registry.Registry;
+import com.github.mouse0w0.wow.profile.User;
 import com.github.mouse0w0.wow.registry.RegistryManager;
 import com.github.mouse0w0.wow.registry.SimpleRegistryManager;
-import com.github.mouse0w0.wowforge.keybinding.ClientKeyBinding;
 import com.github.mouse0w0.wowforge.keybinding.ClientKeyBindingManager;
 import com.github.mouse0w0.wowforge.listener.InputListener;
 import com.github.mouse0w0.wowforge.network.ForgeNetworkManager;
@@ -24,6 +19,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.annotation.Nonnull;
+import java.util.UUID;
 
 @Mod(modid = WowForge.NAME, acceptedMinecraftVersions = "[1.8,1.13)", clientSideOnly = true)
 public class WowForge {
@@ -31,9 +27,10 @@ public class WowForge {
     public static final String NAME = "wowforge";
 
     private static final Logger logger = LogManager.getLogger(NAME);
+    private static final User user = new ForgeUser();
 
-    private static RegistryManager registryManager;
-    private static ClientKeyBindingManager keyBindingManager;
+    private static RegistryManager registryManager = new SimpleRegistryManager();
+    private static ClientKeyBindingManager keyBindingManager = new ClientKeyBindingManager();
 
     @Mod.Instance(NAME)
     public static WowForge instance;
@@ -60,10 +57,7 @@ public class WowForge {
     }
 
     public static void resetRegistry() {
-        registryManager = new SimpleRegistryManager();
-        keyBindingManager = new ClientKeyBindingManager();
-        registryManager.addRegistry(ClientKeyBinding.class, keyBindingManager);
-        registryManager.register(new ClientKeyBinding(Key.KEY_H, KeyModifier.NONE, KeyDomain.UNIVERSAL, "Hello Wow"));
+        getKeyBindingManager().clear();
     }
 
     public static NetworkManager getNetwork() {
@@ -102,6 +96,26 @@ public class WowForge {
         @Override
         public boolean isServer() {
             return false;
+        }
+
+        @Override
+        public Server getServer() {
+            return ServerVerificationPacketHandler.getCurrentServer();
+        }
+
+        @Override
+        public User getUser(UUID uuid) throws UnsupportedOperationException {
+            throw new UnsupportedOperationException("This is client platform");
+        }
+
+        @Override
+        public User getUser(String s) throws UnsupportedOperationException {
+            throw new UnsupportedOperationException("This is client platform");
+        }
+
+        @Override
+        public User getUser() throws UnsupportedOperationException {
+            return WowForge.user;
         }
     }
 }

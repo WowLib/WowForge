@@ -1,5 +1,8 @@
 package com.github.mouse0w0.wowforge.listener;
 
+import com.github.mouse0w0.wow.WowPlatform;
+import com.github.mouse0w0.wow.keybinding.Key;
+import com.github.mouse0w0.wowforge.WowForge;
 import com.github.mouse0w0.wowforge.gui.GuiKeySetting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
@@ -22,17 +25,27 @@ public class InputListener {
 
     @SubscribeEvent
     public void onKeyInput(InputEvent.KeyInputEvent event) {
-        if(OPEN_KEY_SETTING.isKeyDown()) {
+        if (!WowForge.getCurrentServer().isSupport()) {
+            return;
+        }
+
+        if (OPEN_KEY_SETTING.isKeyDown()) {
             Minecraft.getMinecraft().displayGuiScreen(new GuiKeySetting());
         }
 
         int keyCode = Keyboard.getEventKey();
         boolean pressed = Keyboard.getEventKeyState();
+        WowForge.getKeyBindingManager().handle(keyCode, pressed);
     }
 
     @SubscribeEvent
     public void onMouseInput(InputEvent.MouseInputEvent event) {
+        if (!WowForge.getCurrentServer().isSupport()) {
+            return;
+        }
+
         int mouseCode = Mouse.getEventButton();
         boolean pressed = Mouse.getEventButtonState();
+        WowForge.getKeyBindingManager().handle(mouseCode + Key.MOUSE_BUTTON_LEFT.getCode(), pressed);
     }
 }

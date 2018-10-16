@@ -1,18 +1,23 @@
 package com.github.mouse0w0.wowforge.gui;
 
 import com.github.mouse0w0.wow.keybinding.Key;
+import com.github.mouse0w0.wow.keybinding.KeyDomain;
 import com.github.mouse0w0.wow.keybinding.KeyModifier;
 import com.github.mouse0w0.wowforge.WowForge;
 import com.github.mouse0w0.wowforge.keybinding.ClientKeyBinding;
 import com.github.mouse0w0.wowforge.keybinding.ClientKeyBindingManager;
+import com.github.mouse0w0.wowforge.keybinding.KeyBindingUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiListExtended;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.util.Util;
 import net.minecraft.util.text.TextFormatting;
+import net.minecraftforge.client.settings.KeyConflictContext;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import org.lwjgl.input.Keyboard;
 
 import java.util.Arrays;
 import java.util.Comparator;
@@ -34,13 +39,6 @@ public class GuiKeyBindingList extends GuiListExtended {
         int i = 0;
 
         for (ClientKeyBinding keybinding : keyBindings) {
-
-            int j = mcIn.fontRenderer.getStringWidth(keybinding.getKeyDisplayName());
-
-            if (j > this.maxListLabelWidth) {
-                this.maxListLabelWidth = j;
-            }
-
             this.listEntries[i++] = new KeyEntry(keybinding);
         }
     }
@@ -83,22 +81,22 @@ public class GuiKeyBindingList extends GuiListExtended {
         private KeyEntry(ClientKeyBinding name) {
             this.keybinding = name;
             this.keyDesc = name.getDisplayName();
-            this.btnChangeKeyBinding = new GuiButton(0, 0, 0, 95, 20, name.getDisplayName());
+            this.btnChangeKeyBinding = new GuiButton(0, 0, 0, 95, 20, name.getKeyDisplayName());
             this.btnReset = new GuiButton(0, 0, 0, 50, 20, I18n.format("controls.reset"));
         }
 
         public void drawEntry(int slotIndex, int x, int y, int listWidth, int slotHeight, int mouseX, int mouseY, boolean isSelected, float partialTicks) {
             boolean flag = GuiKeyBindingList.this.controlsScreen.buttonId == this.keybinding;
-            GuiKeyBindingList.this.mc.fontRenderer.drawString(this.keyDesc, x + 90 - GuiKeyBindingList.this.maxListLabelWidth, y + slotHeight / 2 - GuiKeyBindingList.this.mc.fontRenderer.FONT_HEIGHT / 2, 16777215);
+            GuiKeyBindingList.this.mc.fontRenderer.drawString(this.keyDesc, x, y + slotHeight / 2 - GuiKeyBindingList.this.mc.fontRenderer.FONT_HEIGHT / 2, 16777215);
             this.btnReset.x = x + 210;
             this.btnReset.y = y;
             this.btnReset.enabled = !this.keybinding.isDefault();
             this.btnReset.drawButton(GuiKeyBindingList.this.mc, mouseX, mouseY, partialTicks);
             this.btnChangeKeyBinding.x = x + 105;
             this.btnChangeKeyBinding.y = y;
-            this.btnChangeKeyBinding.displayString = this.keybinding.getDisplayName();
+            this.btnChangeKeyBinding.displayString = this.keybinding.getKeyDisplayName();
             boolean flag1 = false;
-            boolean keyCodeModifierConflict = true; // less severe form of conflict, like SHIFT conflicting with SHIFT+G
+            boolean keyCodeModifierConflict = false; // less severe form of conflict, like SHIFT conflicting with SHIFT+G
 
             if (this.keybinding.getKey().getCode() != 0) {
                 for (ClientKeyBinding other : WowForge.getKeyBindingManager().getValues()) {
@@ -106,6 +104,16 @@ public class GuiKeyBindingList extends GuiListExtended {
                         flag1 = true;
                         keyCodeModifierConflict = isKeyCodeModifierConflict(this.keybinding, other);
                         break;
+                    }
+                }
+
+                for (KeyBinding other : Minecraft.getMinecraft().gameSettings.keyBindings) {
+                    Key mcKey = KeyBindingUtils.getKeyFromMinecraft(other.getKeyCode());
+                    KeyModifier mcKeyModifier = KeyBindingUtils.getKeyModifierFromForge(other.getKeyModifier());
+                    KeyDomain mcKeyDomain = KeyBindingUtils.getKeyDomainFromForge((KeyConflictContext) other.getKeyConflictContext());
+                    if (isConflictsWithMineCraftKeyBinding(this.keybinding, mcKey, mcKeyModifier, mcKeyDomain)) {
+                        flag1 = true;
+                        keyCodeModifierConflict = isKeyCodeModifierConflict(this.keybinding, mcKey, mcKeyModifier, mcKeyDomain);
                     }
                 }
             }
@@ -119,24 +127,16 @@ public class GuiKeyBindingList extends GuiListExtended {
             this.btnChangeKeyBinding.drawButton(GuiKeyBindingList.this.mc, mouseX, mouseY, partialTicks);
         }
 
-        private boolean isKeyCodeModifierConflict(ClientKeyBinding keyBinding, ClientKeyBinding other) {
-            if(keyBinding.getDomain().isConflicts(other.getDomain())) {
-                return isKeyCodeModifierConflict(keyBinding.getKey(), other.getKeyModifier()) || isKeyCodeModifierConflict(other.getKey(), keyBinding.getKeyModifier());
-            }
-            return false;
+        private boolean isConflictsWithMineCraftKeyBinding(ClientKeyBinding keyBinding, Key mcKey, KeyModifier mcKeyModifier, KeyDomain mcKeyDomain) {
+            return mcKey == keyBinding.getKey() && mcKeyModifier == keyBinding.getKeyModifier() && mcKeyDomain.isConflicts(mcKeyDomain);
         }
 
-        private boolean isKeyCodeModifierConflict(Key key, KeyModifier keyModifier) {
-            switch (keyModifier) {
-                case CONTROL:
-                    return Minecraft.IS_RUNNING_ON_MAC ? key == Key.KEY_LMETA || key == Key.KEY_RMETA : key == Key.KEY_LCONTROL || key == Key.KEY_RCONTROL;
-                case SHIFT:
-                    return key == Key.KEY_LSHIFT || key == Key.KEY_RSHIFT;
-                case ALT:
-                    return key == Key.KEY_LMENU || key == Key.KEY_RMENU;
-                default:
-                    return false;
-            }
+        private boolean isKeyCodeModifierConflict(ClientKeyBinding keyBinding, Key mcKey, KeyModifier mcKeyModifier, KeyDomain mcKeyDomain) {
+            return KeyBindingUtils.isKeyCodeModifierConflict(keyBinding.getKey(), mcKey, keyBinding.getKeyModifier(), mcKeyModifier, keyBinding.getDomain(), mcKeyDomain);
+        }
+
+        private boolean isKeyCodeModifierConflict(ClientKeyBinding keyBinding, ClientKeyBinding other) {
+            return KeyBindingUtils.isKeyCodeModifierConflict(keyBinding.getKey(), other.getKey(), keyBinding.getKeyModifier(), other.getKeyModifier(), keyBinding.getDomain(), other.getDomain());
         }
 
         /**

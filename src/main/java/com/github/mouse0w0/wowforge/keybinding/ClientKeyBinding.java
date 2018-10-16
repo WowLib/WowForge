@@ -14,6 +14,7 @@ public class ClientKeyBinding extends KeyBinding<ClientKeyBinding> {
 
     private Key key;
     private KeyModifier keyModifier;
+    private boolean pressed;
 
     public ClientKeyBinding(Key defaultKey, KeyModifier defaultModifier, KeyDomain domain, String displayName) {
         super(defaultKey, defaultModifier, domain, displayName);
@@ -64,7 +65,7 @@ public class ClientKeyBinding extends KeyBinding<ClientKeyBinding> {
     }
 
     private String getKeyDisplayName(int key) {
-        if (key < 0)
+        if (key >= 240)
         {
             switch (key)
             {
@@ -97,5 +98,13 @@ public class ClientKeyBinding extends KeyBinding<ClientKeyBinding> {
             return KeyModifier.ALT;
         else
             return KeyModifier.NONE;
+    }
+
+    public boolean isPressed() {
+        return pressed;
+    }
+
+    public void setPressed(boolean pressed) {
+        this.pressed = pressed;
     }
 }
