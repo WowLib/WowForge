@@ -41,16 +41,11 @@ public class ClientKeyBindingManager extends RegistryBase<ClientKeyBinding> {
     }
 
     public void init() {
-        refleshKeyToBindings();
+        refreshKeyToBindings();
         loadConfig();
     }
 
-    public void refresh() {
-        refleshKeyToBindings();
-        saveConfig();
-    }
-
-    public void refleshKeyToBindings() {
+    public void refreshKeyToBindings() {
         keyCodeToKeyBindings.clear();
         for (ClientKeyBinding keyBinding : getValues()) {
             keyCodeToKeyBindings.put(keyBinding.getKey().getCode(), keyBinding);
@@ -71,7 +66,7 @@ public class ClientKeyBindingManager extends RegistryBase<ClientKeyBinding> {
     }
 
     public void loadConfig() {
-        Path configFile = WowForge.getServerConfigPath("keyBindings.json");
+        Path configFile = WowForge.getServerConfigPath().resolve("keyBindings.json");
         if (!Files.exists(configFile)) {
             return;
         }
@@ -95,11 +90,11 @@ public class ClientKeyBindingManager extends RegistryBase<ClientKeyBinding> {
     }
 
     public void saveConfig() {
-        Path configFile = WowForge.getServerConfigPath("keyBindings.json");
+        Path configFile = WowForge.getServerConfigPath().resolve("keyBindings.json");
         try {
             if (!Files.exists(configFile)) {
                 if (!Files.exists(configFile.getParent())) {
-                    Files.createDirectory(configFile.getParent());
+                    Files.createDirectories(configFile.getParent().toAbsolutePath());
                 }
                 Files.createFile(configFile);
             }

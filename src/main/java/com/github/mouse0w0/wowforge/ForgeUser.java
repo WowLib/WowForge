@@ -8,7 +8,16 @@ import java.util.UUID;
 
 public class ForgeUser implements User {
 
-    private final UUID userUuid = UUID.fromString(Minecraft.getMinecraft().getSession().getPlayerID());
+    private final UUID userUuid = fromString(Minecraft.getMinecraft().getSession().getPlayerID());
+
+    private static UUID fromString(final String input) {
+        try {
+            return UUID.fromString(input.replaceFirst("(\\w{8})(\\w{4})(\\w{4})(\\w{4})(\\w{12})", "$1-$2-$3-$4-$5"));
+        }catch (IllegalArgumentException e) {
+            WowForge.getLogger().warn("Unknown player's uuid.", e);
+            return null;
+        }
+    }
 
     @Override
     public boolean isSupport() {

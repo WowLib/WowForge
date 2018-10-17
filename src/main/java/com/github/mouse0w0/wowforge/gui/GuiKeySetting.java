@@ -58,13 +58,14 @@ public class GuiKeySetting extends GuiScreen {
      */
     protected void actionPerformed(GuiButton button) throws IOException {
         if (button.id == 200) {
+            WowForge.getKeyBindingManager().saveConfig();
             this.mc.displayGuiScreen(null);
         } else if (button.id == 201) {
             for (ClientKeyBinding keybinding : WowForge.getKeyBindingManager().getValues()) {
                 keybinding.resetToDefault();
             }
 
-            WowForge.getKeyBindingManager().refresh();
+            WowForge.getKeyBindingManager().refreshKeyToBindings();
         }
 //        } else if (button.id < 100 && button instanceof GuiOptionButton) {
 //            this.options.setOptionValue(((GuiOptionButton) button).getOption(), 1);
@@ -80,7 +81,7 @@ public class GuiKeySetting extends GuiScreen {
             buttonId.setKey(Key.valueOfMouse(mouseButton));
             buttonId.setKeyModifier(getActiveModifier());
             this.buttonId = null;
-            WowForge.getKeyBindingManager().refresh();
+            WowForge.getKeyBindingManager().refreshKeyToBindings();
         } else if (mouseButton != 0 || !this.keyBindingList.mouseClicked(mouseX, mouseY, mouseButton)) {
             super.mouseClicked(mouseX, mouseY, mouseButton);
         }
@@ -111,7 +112,7 @@ public class GuiKeySetting extends GuiScreen {
 
             if (!net.minecraftforge.client.settings.KeyModifier.isKeyCodeModifier(keyCode))
                 this.buttonId = null;
-            WowForge.getKeyBindingManager().refresh();
+            WowForge.getKeyBindingManager().refreshKeyToBindings();
         } else {
             super.keyTyped(typedChar, keyCode);
         }

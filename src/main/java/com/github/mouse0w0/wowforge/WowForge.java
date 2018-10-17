@@ -79,8 +79,8 @@ public class WowForge {
         return logger;
     }
 
-    public static Path getServerConfigPath(String fileName) {
-        return Paths.get("wow", getCurrentServer().getAddress().hashCode() + "_" + getCurrentServer().getUUID().toString(), fileName);
+    public static Path getServerConfigPath() {
+        return Paths.get("wow", "server", Integer.toHexString(getCurrentServer().getAddress().hashCode()) + "_" + getCurrentServer().getUUID().toString().replace('-','_'));
     }
 
     @Nonnull
