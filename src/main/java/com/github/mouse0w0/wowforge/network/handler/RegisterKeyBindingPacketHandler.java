@@ -1,6 +1,5 @@
 package com.github.mouse0w0.wowforge.network.handler;
 
-import com.github.mouse0w0.wow.WowPlatform;
 import com.github.mouse0w0.wow.keybinding.Key;
 import com.github.mouse0w0.wow.keybinding.KeyDomain;
 import com.github.mouse0w0.wow.keybinding.KeyModifier;
@@ -29,6 +28,6 @@ public class RegisterKeyBindingPacketHandler implements PacketHandler<RegisterKe
             keyBindingManager.register(keyBinding);
             keyBindingManager.setId(keyBinding, jo.get("id").getAsInt());
         }
-        keyBindingManager.refresh();
+        keyBindingManager.init();
     }
 }

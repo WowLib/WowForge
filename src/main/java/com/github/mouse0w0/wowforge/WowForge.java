@@ -19,6 +19,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.annotation.Nonnull;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.UUID;
 
 @Mod(modid = WowForge.NAME, acceptedMinecraftVersions = "[1.8,1.13)", clientSideOnly = true)
@@ -72,8 +74,13 @@ public class WowForge {
         return keyBindingManager;
     }
 
+
     public static Logger getLogger() {
         return logger;
+    }
+
+    public static Path getServerConfigPath(String fileName) {
+        return Paths.get("wow", getCurrentServer().getAddress().hashCode() + "_" + getCurrentServer().getUUID().toString(), fileName);
     }
 
     @Nonnull
