@@ -27,7 +27,7 @@ public class ServerVerificationPacketHandler implements PacketHandler<ServerVeri
     }
 
     @Override
-    public void hander(Object sender, ServerVerificationPacket packet) {
+    public void handle(Object sender, ServerVerificationPacket packet) {
         currentServer = new Server(true, packet.getInternalVersion(), packet.getUUID(), Minecraft.getMinecraft().getCurrentServerData().serverIP);
         WowForge.getLogger().info("Received server verification. Version: " + currentServer.getVersion());
         WowForge.getNetwork().send(null, new ClientVerificationPacket(WowPlatform.getInternalVersion()));

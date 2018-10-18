@@ -14,7 +14,7 @@ import com.google.gson.JsonObject;
 
 public class RegisterKeyBindingPacketHandler implements PacketHandler<RegisterKeyBindingPacket> {
     @Override
-    public void hander(Object o, RegisterKeyBindingPacket packet) {
+    public void handle(Object o, RegisterKeyBindingPacket packet) {
         JsonArray keyBindings = packet.getJson();
         ClientKeyBindingManager keyBindingManager = WowForge.getKeyBindingManager();
         keyBindingManager.clear();
