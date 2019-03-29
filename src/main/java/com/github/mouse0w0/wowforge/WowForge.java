@@ -1,5 +1,14 @@
 package com.github.mouse0w0.wowforge;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.UUID;
+
+import javax.annotation.Nonnull;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.github.mouse0w0.wow.PlatformProvider;
 import com.github.mouse0w0.wow.WowPlatform;
 import com.github.mouse0w0.wow.network.NetworkManager;
@@ -11,17 +20,16 @@ import com.github.mouse0w0.wowforge.keybinding.ClientKeyBindingManager;
 import com.github.mouse0w0.wowforge.listener.InputListener;
 import com.github.mouse0w0.wowforge.network.ForgeNetworkManager;
 import com.github.mouse0w0.wowforge.network.handler.ServerVerificationPacketHandler;
+import com.github.mouse0w0.wowforge.render.CustomBlockRenderer;
+import com.github.mouse0w0.wowforge.render.CustomSpawnerBlockRenderer;
+
+import net.minecraft.tileentity.TileEntityMobSpawner;
+import net.minecraft.tileentity.TileEntitySign;
+import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import javax.annotation.Nonnull;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.UUID;
 
 @Mod(modid = WowForge.NAME, acceptedMinecraftVersions = "[1.8,1.13)", clientSideOnly = true)
 public class WowForge {
@@ -46,6 +54,9 @@ public class WowForge {
         network.init();
 
         WowPlatform.setPlatformProvider(new ForgePlatformProvider());
+
+        ClientRegistry.bindTileEntitySpecialRenderer(TileEntitySign.class, new CustomBlockRenderer());
+        ClientRegistry.bindTileEntitySpecialRenderer(TileEntityMobSpawner.class, new CustomSpawnerBlockRenderer());
     }
 
     @Mod.EventHandler
@@ -74,13 +85,12 @@ public class WowForge {
         return keyBindingManager;
     }
 
-
     public static Logger getLogger() {
         return logger;
     }
 
     public static Path getServerConfigPath() {
-        return Paths.get("wow", "server", Integer.toHexString(getCurrentServer().getAddress().hashCode()) + "_" + getCurrentServer().getUUID().toString().replace('-','_'));
+        return Paths.get("wow", "server", Integer.toHexString(getCurrentServer().getAddress().hashCode()) + "_" + getCurrentServer().getUUID().toString().replace('-', '_'));
     }
 
     @Nonnull
